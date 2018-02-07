@@ -1,4 +1,4 @@
--name: test ntp\sshd Sample
+-name: apt update
  hosts: all
  become: true
  apt:
