@@ -2,7 +2,7 @@
 - hosts: all
   sudo: yes
   tasks: 
-- name: Update and upgrade apt packages
+- name: Update
   become: true
   apt:
     upgrade: yes
