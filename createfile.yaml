@@ -1,4 +1,8 @@
-- name: ensure file exists
+---
+- hosts: all
+  sudo: yes
+  tasks: 
+  - name: ensure file exists
   copy:
     content: ""
     dest: /etc/nologin
