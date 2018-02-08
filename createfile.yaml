@@ -2,11 +2,11 @@
 - hosts: all
   sudo: yes
   tasks: 
-  - name: ensure file exists
-  copy:
-    content: ""
-    dest: /etc/nologin
-    force: no
-    group: sys
-    owner: root
-    mode: 0555
+  - name: Install MySQL server
+    apt: name=mysql-server state=latest
+
+  - name: Install Apache module for MySQL authentication
+    apt: name=libapache2-mod-auth-mysql state=latest
+
+  - name: Install MySQL module for PHP
+    apt: name=php5-mysql state=latest
