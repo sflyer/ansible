@@ -1,0 +1,87 @@
+- hosts: new
+  become: yes
+  #become_user: root
+  #become_method: su
+  tasks:
+  - name: update and upgrade
+    apt:
+      update_cache: yes
+      upgrade: dist
+      autoclean: yes
+      autoremove: yes
+  - name: install
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - htop
+      - nano
+      - iotop
+      - krb5-user
+      - samba
+      - winbind
+      - libpam-krb5
+      - libpam-winbind
+      - libnss-winbind
+      - smbclient
+      - ntp
+  - name: edit dns in dhcp search domain
+    lineinfile:
+      path: /etc/dhcp/dhclient.conf
+      regexp: '^#supersede domain-name'
+      line: 'supersede domain-name "domain.local";'
+  - name: edit dns in dhcp nameservers
+    lineinfile:
+      path: /etc/dhcp/dhclient.conf
+      regexp: '^#domain-name-servers'
+      line: 'prepend domain-name-servers 192.168.1.1, 192.168.1.2;'
+  - name: add hostname
+    lineinfile:
+      path: /etc/hosts
+      regexp: "^#{{ ansible_facts['nodename'] }}"
+      line: "127.0.1.1	{{ ansible_facts['nodename'] }}.domain.local	{{ ansible_facts['nodename'] }}"
+  - name: add ntp server
+    blockinfile:
+      path: /etc/ntp.conf
+      block: |
+        server dc.domain.local
+  - name: restart ntp
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: ntp
+
+  - name: copy krb5 config
+    copy:
+      src: /home/user/playbook/config/krb5.conf
+      dest: /etc/krb5.conf
+      force: yes
+  - name: copy smb config
+    copy:
+      src: /home/user/playbook/config/smb.conf
+      dest: /etc/samba/smb.conf
+      force: yes
+  - name: Join Domain
+    shell: "net ads join -U chirkov%{{ad_pass}} -D DOMAIN"
+  - name: add limits
+    lineinfile:
+      path: /etc/security/limits.conf
+      line: "*               -    nofile            16384"
+  - name: add limits2
+    lineinfile:
+      path: /etc/security/limits.conf
+      line: "root               -    nofile            16384"
+  - name: edit nsswitch
+    lineinfile:
+      path: /etc/nsswitch.conf
+      regexp: '^passwd:         compat'
+      line: 'passwd:         compat winbind'
+  - name: edit nsswitch2
+    lineinfile:
+      path: /etc/nsswitch.conf
+      regexp: '^group:          compat'
+      line: 'group:          compat winbind'
+  - name: add PAM
+    lineinfile:
+      path: /etc/pam.d/common-session
+      line: "session  optional  pam_mkhomedir.so skel=/etc/skel/ umask=0077"
