@@ -1,0 +1,11 @@
+---
+- hosts: workstation
+  tasks:
+  - name: copy script
+    copy:
+      src: /home/user/playbook/debian10/config/ansible/run_admin_message.sh
+      dest: /home/ansible/run_admin_message.sh
+  - name: Changing perm of "run_admin_message.sh", adding "+x"
+    file: dest=/home/ansible/run_admin_message.sh mode=a+x
+  - name: run script
+    shell: /home/ansible/run_admin_message.sh
