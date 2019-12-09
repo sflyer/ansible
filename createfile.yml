@@ -1,8 +1,0 @@
-- name: ensure file exists
-  copy:
-    content: ""
-    dest: /home/user/test.txt
-    force: no
-    group: sys
-    owner: root
-    mode: 0555
