@@ -1,0 +1,47 @@
+- hosts: workstation
+  become: yes
+  #become_user: root
+  #become_method: su
+  tasks:
+  - name: "Check if installed"
+    package_facts:
+      manager: "auto"
+  - name: remove old 1c
+    apt:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - 1c-enterprise83-common
+      - 1c-enterprise83-common-nls
+      - 1c-enterprise83-server
+      - 1c-enterprise83-server-nls
+      - 1c-enterprise83-ws
+      - 1c-enterprise83-ws-nls
+      - 1c-enterprise83-crs
+      - 1c-enterprise83-client
+    when: 
+      -  "'1c-enterprise83-common' in ansible_facts.packages or
+         '1c-enterprise83-common-nls' in ansible_facts.packages or
+         '1c-enterprise83-server' in ansible_facts.packages or
+         '1c-enterprise83-server-nls' in ansible_facts.packages or
+         '1c-enterprise83-ws' in ansible_facts.packages or
+         '1c-enterprise83-ws-nls' in ansible_facts.packages or
+         '1c-enterprise83-crs' in ansible_facts.packages or
+         '1c-enterprise83-client' in ansible_facts.packages" 
+  - name: install 1c and upgrade os
+    apt:
+      update_cache: yes
+      upgrade: dist
+      install_recommends: yes
+      autoclean: yes
+      autoremove: yes
+      pkg:
+      - 1c-enterprise83-common
+      - 1c-enterprise83-common-nls
+      - 1c-enterprise83-server
+      - 1c-enterprise83-server-nls
+      - 1c-enterprise83-ws
+      - 1c-enterprise83-ws-nls
+      - 1c-enterprise83-crs
+      - 1c-enterprise83-client
