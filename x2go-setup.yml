@@ -1,0 +1,54 @@
+---
+- hosts: new
+  become: yes
+  #become_user: root
+  #become_method: su
+  tasks:
+  - name: Add an apt key by id from a keyserver
+    apt_key:
+      keyserver: keys.gnupg.net
+      id: E1F958385BFE2B6E
+  - name: add lan repo apt-proxy amd64
+    apt_repository:
+      repo: deb http://packages.x2go.org/debian buster extras main
+      state: present
+      filename: x2go
+  - name: install x2goserver
+    apt:
+      pkg:
+      - x2goserver
+      - x2goserver-desktopsharing
+      - x2goserver-xsession
+  - name: creategroup
+    debconf:
+      name: x2goserver-desktopsharing
+      question: x2goserver-desktopsharing/create-group-for-sharing
+      value: true
+      vtype: select
+  - name: name group
+    debconf: 
+      name: x2goserver-desktopsharing
+      question: x2goserver-desktopsharing/group-sharing
+      value: x2godesktopsharing
+      vtype: text
+  - name: autostart
+    debconf:
+      name: x2goserver-desktopsharing
+      question: x2goserver-desktopsharing/auto-activate-on-logon
+      value: true
+      vtype: select
+  - name: autoenable
+    debconf:
+      name: x2goserver-desktopsharing
+      question: x2goserver-desktopsharing/auto-start-on-logon
+      value: true
+      vtype: select
+  - name: add users to group x2go admins
+    user:
+      name: "{{ item }}"
+      groups: x2godesktopsharing
+      append: yes
+    with_items:
+      - user1
+      - user2
+      - user3
